@@ -6,16 +6,16 @@ const Register = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
-  const submitForm = (event) => {
+  const { handleRegister } = useAuth()
+  const navigate = useNavigate()
+
+  const submitForm = async (event) => {
     event.preventDefault()
 
-    const payload = {
-      username,
-      email,
-      password,
-    }
+    const payload = { username, email, password }
 
-    console.log('Register payload:', payload)
+    await handleRegister(payload)
+    navigate("/login")  // ← register ke baad login pe bhejo
   }
 
   return (

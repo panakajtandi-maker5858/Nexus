@@ -10,7 +10,7 @@ function App(){
 
     useEffect(()=>{
         auth.handleGetMe()
-    },{})
+    },[])
 
 return (
     <RouterProvider router={router} />

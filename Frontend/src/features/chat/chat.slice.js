@@ -36,6 +36,8 @@ const chatSlice = createSlice({
         },
         addMessages: (state, action) => {
             const { chatId, messages } = action.payload
+            if (!state.chats[chatId]) return 
+             if (!messages || !messages.length) return  
             state.chats[chatId].messages.push(...messages)
         },
     }
