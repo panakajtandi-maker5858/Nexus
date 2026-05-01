@@ -12,6 +12,16 @@ const dispatch = useDispatch()
 async function handleSendMessage({ message, chatId }) {
     try {
         dispatch(setLoading(true))
+
+// FIRST STORE USER'S MESSAGE TO SHOW IN MESSAGE SCREEN  
+        if (chatId) {
+            dispatch(addNewMessage({
+                chatId: chatId,
+                content: message,
+                role: "user",
+            }))
+        }
+
         const data = await sendMessage({ message, chatId })
         const { chat, aiMessage } = data
 
@@ -21,11 +31,11 @@ async function handleSendMessage({ message, chatId }) {
                 title: chat.title,
             }))
 
-        dispatch(addNewMessage({
-            chatId: chatId || chat._id,
-            content: message,
-            role: "user",
-        }))
+        // dispatch(addNewMessage({
+        //     chatId: chatId || chat._id,
+        //     content: message,
+        //     role: "user",
+        // }))
         dispatch(addNewMessage({
             chatId: chatId || chat._id,
             content: aiMessage.content,
@@ -35,7 +45,7 @@ async function handleSendMessage({ message, chatId }) {
     } catch (err) {
         dispatch(setError(err.message))
     } finally {
-        dispatch(setLoading(false)) // ← yeh missing tha!
+        dispatch(setLoading(false)) 
     }
 }
 
@@ -79,14 +89,32 @@ dispatch(setChats(chats.reduce((acc, chat) => {
     }
 
 
+    async function handleNewChat() {
+        dispatch(setCurrentChatId(null))
+    }
 
+
+
+
+async function handleDeleteChat(chatId) {
+    try {
+        await deleteChat(chatId)
+        dispatch(setCurrentChatId(null))
+        await handleGetChats()
+    } catch (err) {
+        console.error("Delete failed:", err)
+    }
+}
 
 
  return {
         initializeSocketConnection,
         handleSendMessage,
         handleGetChats,
-        handleOpenChat
+        handleOpenChat ,
+        handleNewChat ,
+        handleDeleteChat
+        
     }
 
 
