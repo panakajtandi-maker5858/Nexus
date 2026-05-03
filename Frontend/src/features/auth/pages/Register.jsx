@@ -8,17 +8,37 @@ const Register = () => {
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [registerError, setRegisterError] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const { handleRegister } = useAuth()
   const navigate = useNavigate()
 
   const submitForm = async (event) => {
     event.preventDefault()
+    setRegisterError(null)
 
-    const payload = { username, email, password }
+     // Password validation
+    if (password.length < 6) {
+        setRegisterError("Password must be at least 6 characters!")
+        setTimeout(() => setRegisterError(null), 5000)
+        return
+    }
 
-    await handleRegister(payload)
-    navigate("/login")  // ← register ke baad login pe bhejo
+
+  setIsLoading(true)
+    const result = await handleRegister({ username, email, password })
+    setIsLoading(false)
+
+  
+
+    if (result?.success) {
+      navigate("/login?verified=false")  
+    } else {
+      setRegisterError("User already exists !")
+      setTimeout(() => setRegisterError(null), 5000)
+    }
   }
 
   return (
@@ -31,6 +51,15 @@ const Register = () => {
           <p className="mt-2 text-sm text-zinc-300">
             Register with your username, email, and password.
           </p>
+
+         {/* Error Message */}
+          {registerError && (
+            <div className='mt-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400 flex items-center gap-2'>
+              <span></span>
+              {registerError}
+            </div>
+          )}
+
 
           <form onSubmit={submitForm} className="mt-8 space-y-5">
             <div>
@@ -64,25 +93,50 @@ const Register = () => {
             </div>
 
             <div>
-              <label htmlFor="password" className="mb-2 block text-sm font-medium text-zinc-200">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder="Create a password"
-                required
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-950/80 px-4 py-3 text-zinc-100 outline-none ring-0 transition focus:border-[#31b8c6] focus:shadow-[0_0_0_3px_rgba(49,184,198,0.25)]"
-              />
-            </div>
+
+  <label htmlFor="password" className="mb-2 block text-sm font-medium text-zinc-200">
+    Password
+  </label>
+  <div className="relative">
+    <input
+      id="password"
+      type={showPassword ? 'text' : 'password'}
+      value={password}
+      onChange={(event) => setPassword(event.target.value)}
+      placeholder="Enter your password"
+      required
+      className="w-full rounded-lg border border-zinc-700 bg-zinc-950/80 px-4 py-3 pr-12 text-zinc-100 outline-none ring-0 transition focus:border-[#31b8c6] focus:shadow-[0_0_0_3px_rgba(49,184,198,0.25)]"
+    />
+    {/* Show/Hide button */}
+    <button
+      type="button"
+      onClick={() => setShowPassword(!showPassword)}
+      className="absolute cursor-pointer right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-200 transition"
+    >
+      {showPassword ? (
+        // Eye Off icon
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/>
+          <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/>
+          <line x1="1" y1="1" x2="23" y2="23"/>
+        </svg>
+      ) : (
+        // Eye icon
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      )}
+    </button>
+  </div>
+</div>
 
             <button
               type="submit"
-              className="w-full rounded-lg bg-[#31b8c6] px-4 py-3 font-semibold text-zinc-950 transition hover:bg-[#45c7d4] focus:outline-none focus:shadow-[0_0_0_3px_rgba(49,184,198,0.35)]"
+              disabled={isLoading}
+              className="w-full rounded-lg cursor-pointer bg-[#31b8c6] px-4 py-3 font-semibold text-zinc-950 transition hover:bg-[#45c7d4] focus:outline-none focus:shadow-[0_0_0_3px_rgba(49,184,198,0.35)]"
             >
-              Register
+              {isLoading ? "Registering..." : "Register"}
             </button>
           </form>
 

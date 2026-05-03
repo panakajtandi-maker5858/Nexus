@@ -200,3 +200,22 @@ const html =
 
 
 }
+
+
+
+
+
+
+/**
+ * @desc Logout user
+ * @route POST /api/auth/logout
+ * @access Private
+ */
+export async function logout(req, res) {
+    res.clearCookie("token")
+    
+    res.status(200).json({
+        message: "Logout successful",
+        success: true,
+    })
+}

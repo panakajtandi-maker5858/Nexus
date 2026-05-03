@@ -1,5 +1,5 @@
 import { useDispatch } from "react-redux"
-import { register , login , getMe  } from "../service/auth.api"
+import { register , login , getMe , logout } from "../service/auth.api"
 import { setUser , setLoading , setError } from "../auth.slice"
 
 
@@ -12,8 +12,10 @@ async function handleRegister({ email , username , password}) {
     try {
         dispatch(setLoading(true))
         const data = await register({email , username , password})
+         return { success: true } 
     } catch(error){
         dispatch(setError(error.response?.data?.message || "Registration failed"))
+     return { success: false } 
     } finally{
         dispatch(setLoading(false))
     }
@@ -26,8 +28,16 @@ async function handleLogin({ email , password}) {
         dispatch(setLoading(true))
         const data = await login({email ,  password})
         dispatch(setUser(data.user))
+         return { success: true }
     } catch(err){
+        const message = err.response?.data?.err 
+
+if(message === "Email not verified"){
+    return{ notVerified : true}
+}
+
         dispatch(setError(err.response?.data?.message || "Login failed"))
+        return { success: false }
     } finally {
         dispatch(setLoading(false))
     }
@@ -49,11 +59,28 @@ dispatch(setError(err.response?.data?.message || "Failed to fetch user !"))
 }
 
 
+async function handleLogout() {
+    try {
+        dispatch(setLoading(true))
+        await logout()
+        dispatch(setUser(null))
+    } 
+    catch(err){
+        dispatch(setError(err.response?.data?.message || "Logout failes"))
+    }
+    finally{
+        dispatch(setLoading(false))
+    }
+    
+}
+
+
 
 return {
     handleRegister ,
     handleLogin ,
-    handleGetMe
+    handleGetMe ,
+    handleLogout
 }
 
 }
