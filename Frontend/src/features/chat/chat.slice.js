@@ -40,8 +40,17 @@ const chatSlice = createSlice({
              if (!messages || !messages.length) return  
             state.chats[chatId].messages.push(...messages)
         },
+        setStreamingMessage: (state, action) => {
+    const { chatId, content } = action.payload
+    if (state.chats[chatId]) {
+        const messages = state.chats[chatId].messages       // For typing effect in reposne by AI
+        if (messages.length > 0) {
+            messages[messages.length - 1].content = content
+        }
+    }
+},
     }
 })
 
-export const { setChats, setCurrentChatId, setLoading, setError, createNewChat, addNewMessage, addMessages } = chatSlice.actions
+export const { setChats, setCurrentChatId, setLoading, setError, createNewChat, addNewMessage, addMessages , setStreamingMessage} = chatSlice.actions
 export default chatSlice.reducer

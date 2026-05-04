@@ -208,42 +208,54 @@ const messagesEndRef = useRef(null)
   </div>
 )}
 
-          {chats[currentChatId]?.messages.map((message, index) => (
-            <div
-              key={index}
-              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              {/* AI Avatar */}
-              {message.role === 'ai' && (
-                <div className='w-7 h-7 rounded-lg bg-gradient-to-br from-[#31b8c6] to-[#1a7a85] flex items-center justify-center text-xs font-bold mr-2 mt-1 shrink-0'>
-                  N
-                </div>
-              )}
 
-              <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm md:text-base ${
-                message.role === 'user'
-                  ? 'bg-[#31b8c6]/20 border border-[#31b8c6]/30 text-white rounded-br-none'
-                  : 'text-white/90'
-              }`}>
-                {message.role === 'user' ? (
-                  <p>{message.content}</p>
-                ) : (
-                  <ReactMarkdown
-                    components={{
-                      p: ({ children }) => <p className='mb-2 last:mb-0'>{children}</p>,
-                      ul: ({ children }) => <ul className='mb-2 list-disc pl-5'>{children}</ul>,
-                      ol: ({ children }) => <ol className='mb-2 list-decimal pl-5'>{children}</ol>,
-                      code: ({ children }) => <code className='rounded bg-white/10 px-1 py-0.5 text-[#31b8c6]'>{children}</code>,
-                      pre: ({ children }) => <pre className='mb-2 overflow-x-auto rounded-xl bg-black/30 p-3'>{children}</pre>
-                    }}
-                    remarkPlugins={[remarkGfm]}
-                  >
-                    {message.content}
-                  </ReactMarkdown>
-                )}
-              </div>
-            </div>
-          ))}
+         {chats[currentChatId]?.messages.map((message, index) => {
+  const isLastMessage = index === chats[currentChatId].messages.length - 1
+  const isAiTyping = message.role === 'ai' && isLastMessage && isLoading === false && message.content === ''
+
+  return (
+    <div
+      key={index}
+      className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+    >
+      {message.role === 'ai' && (
+        <div className='w-7 h-7 rounded-lg bg-gradient-to-br from-[#31b8c6] to-[#1a7a85] flex items-center justify-center text-xs font-bold mr-2 mt-1 shrink-0'>
+          N
+        </div>
+      )}
+
+      <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm md:text-base ${
+        message.role === 'user'
+          ? 'bg-[#31b8c6]/20 border border-[#31b8c6]/30 text-white rounded-br-none'
+          : 'text-white/90'
+      }`}>
+        {message.role === 'user' ? (
+          <p>{message.content}</p>
+        ) : (
+          <>
+            <ReactMarkdown
+              components={{
+                p: ({ children }) => <p className='mb-2 last:mb-0'>{children}</p>,
+                ul: ({ children }) => <ul className='mb-2 list-disc pl-5'>{children}</ul>,
+                ol: ({ children }) => <ol className='mb-2 list-decimal pl-5'>{children}</ol>,
+                code: ({ children }) => <code className='rounded bg-white/10 px-1 py-0.5 text-[#31b8c6]'>{children}</code>,
+                pre: ({ children }) => <pre className='mb-2 overflow-x-auto rounded-xl bg-black/30 p-3'>{children}</pre>
+              }}
+              remarkPlugins={[remarkGfm]}
+            >
+              {message.content}
+            </ReactMarkdown>
+            {/* Typing cursor — sirf last AI message pe */}
+            {isLastMessage && message.content !== '' && (
+              <span className='typing-cursor' />
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  )
+})}
+
 
           {/* Loading indicator */}
           {isLoading && (
@@ -281,7 +293,7 @@ const messagesEndRef = useRef(null)
             <button
               type='submit'
               disabled={!chatInput.trim() || isLoading}
-              className='rounded-xl bg-[#31b8c6] px-5 py-3 font-semibold text-zinc-950 transition hover:bg-[#45c7d4] disabled:opacity-40 disabled:cursor-not-allowed'
+              className='rounded-xl cursor-pointer bg-[#31b8c6] px-5 py-3 font-semibold text-zinc-950 transition hover:bg-[#45c7d4] disabled:opacity-40 disabled:cursor-not-allowed'
             >
               Send
             </button>

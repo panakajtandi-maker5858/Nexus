@@ -1,6 +1,6 @@
 import { initializeSocketConnection } from "../service/chat.socket.js"
 import { sendMessage, getChats , getMessages , deleteChat } from "../service/chat.api.js"
-import { setChats , setCurrentChatId , setError , setLoading , createNewChat , addMessages , addNewMessage } from "../chat.slice.js"
+import { setChats , setCurrentChatId , setError , setLoading , createNewChat , addMessages , addNewMessage , setStreamingMessage} from "../chat.slice.js"
 import { useDispatch } from "react-redux"
 
 
@@ -38,13 +38,48 @@ async function handleSendMessage({ message, chatId }) {
         // }))
         dispatch(addNewMessage({
             chatId: chatId || chat._id,
-            content: aiMessage.content,
+            content: "",
             role: aiMessage.role,
         }))
         dispatch(setCurrentChatId(chatId || chat._id))
-    } catch (err) {
+
+      dispatch(setLoading(false))
+
+        // Typing effect of response by Ai :-
+        const fullText = aiMessage.content
+        const words = fullText.split(' ')
+        let currentText = ''
+        const currentChatId = chatId || chat._id
+
+        await new Promise((resolve) => {
+            let i = 0
+            const interval = setInterval(() => {
+                if (i >= words.length) {
+                    clearInterval(interval)
+                    // Final text set 
+                    dispatch(setStreamingMessage({
+                        chatId: currentChatId,
+                        content: fullText,
+                    }))
+                    resolve()
+                    return
+                }
+                currentText += (i > 0 ? ' ' : '') + words[i]
+                dispatch(setStreamingMessage({
+                    chatId: currentChatId,
+                    content: currentText,
+                }))
+                i++
+            }, 70) 
+        })
+
+
+
+    }
+     catch (err) {
         dispatch(setError(err.message))
-    } finally {
+    } 
+    finally {
         dispatch(setLoading(false)) 
     }
 }
