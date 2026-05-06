@@ -34,7 +34,7 @@ const Register = () => {
   
 
     if (result?.success) {
-      navigate("/login?verified=false")  
+      navigate("/login")  
     } else {
       setRegisterError("User already exists !")
       setTimeout(() => setRegisterError(null), 5000)

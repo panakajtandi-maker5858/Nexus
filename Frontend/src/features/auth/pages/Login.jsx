@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link, useNavigate , useSearchParams } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { useAuth } from '../hook/useAuth'
 import { useSelector } from 'react-redux'
 import { Navigate } from 'react-router'
@@ -10,11 +10,8 @@ import { Navigate } from 'react-router'
 
 
 const Login = ()=>{
-
-const [ email , setEmail ] = useState('')
+const [ email , setEmail] = useState('')
 const [ password , setPassword] = useState('')
- const [verificationMsg, setVerificationMsg] = useState(false)
-   const [searchParams] = useSearchParams()
    const [loginError, setLoginError] = useState(null)
    const [isSubmitting, setIsSubmitting] = useState(false)
    const [showPassword, setShowPassword] = useState(false)
@@ -24,7 +21,6 @@ const [ password , setPassword] = useState('')
 
 const user = useSelector(state => state.auth.user)
 const loading = useSelector(state => state.auth.loading)
- const showVerificationMsg = searchParams.get('verified') === 'false'
 const { handleLogin } = useAuth()
 const navigate = useNavigate()
 
@@ -71,13 +67,6 @@ return (
                         Sign in with your email and password.
                     </p>
 
-
-                {/* Verification Message */}
-                    {showVerificationMsg && (
-                        <div className='mt-4 rounded-xl border border-[#31b8c6]/30 bg-[#31b8c6]/10 px-4 py-3 text-sm text-[#31b8c6]'>
-                             Please verfiy your account . We have sent you an email .
-                        </div>
-                    )}
 
 
                     {/* Error Message */}

@@ -11,9 +11,12 @@ const dispatch = useDispatch()
 async function handleRegister({ email , username , password}) {
     try {
         dispatch(setLoading(true))
+        
         const data = await register({email , username , password})
+        
          return { success: true } 
     } catch(error){
+       
         dispatch(setError(error.response?.data?.message || "Registration failed"))
      return { success: false } 
     } finally{
@@ -30,11 +33,6 @@ async function handleLogin({ email , password}) {
         dispatch(setUser(data.user))
          return { success: true }
     } catch(err){
-        const message = err.response?.data?.err 
-
-if(message === "Email not verified"){
-    return{ notVerified : true}
-}
 
         dispatch(setError(err.response?.data?.message || "Login failed"))
         return { success: false }

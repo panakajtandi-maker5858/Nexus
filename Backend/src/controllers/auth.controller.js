@@ -1,6 +1,6 @@
 import userModel from "../models/user.model.js";
 import jwt from "jsonwebtoken";
-import { sendEmail } from "../services/mail.service.js";
+
 
 
 
@@ -31,9 +31,13 @@ export async function register(req, res) {
 
         const user = await userModel.create({ username, email, password })
 
+      console.log("User created:", user.email)
+
         const emailVerificationToken = jwt.sign({
             email: user.email,
         }, process.env.JWT_SECRET)
+
+        console.log("Token created, sending email...")
 
         // Turant response
         res.status(201).json({
@@ -55,7 +59,8 @@ export async function register(req, res) {
                 <p>Please verify your email:</p>
                 <a href="${process.env.BACKEND_URL || 'http://localhost:3000'}/api/auth/verify-email?token=${emailVerificationToken}">Verify Email</a>
             `
-        }).catch(err => console.error("Email error:", err))
+        }).then(() => console.log("EMAIL SENT TO:", email))
+        .catch(err => console.error("Email error:", err))
 
     } catch (err) {
         console.error("Register error:", err) // ← ab error dikhega!
@@ -101,13 +106,6 @@ if (!isPasswordMatch) {
     })
 }
 
-if(!user.verified) {
-    return res.status(400).json({
-        message: 'Please verify your email before logging in' ,
-        success : false ,
-        err : "Email not verified"
-    })
-}
 
 const token = jwt.sign({
     id : user._id ,
@@ -164,57 +162,6 @@ export async function getMe(req, res) {
 
 
 }
-
-
-
-/*
-@desc Verify user's email address
-@route GET   /api/auth/verify-email
-@access Public 
-@query { token }
-*/
-
-export async function verifyEmail(req, res) {
-    const { token } = req.query ;
-
-   try {
-    const decoded = jwt.verify(token , process.env.JWT_SECRET) ;
-
-    const user = await userModel.findOne({ email : decoded.email })
-
-    if(!user) {
-        return res.status(400).json({
-            message:"Invalid token" ,
-            success : false ,
-            err : "User not found"
-        })
-    }
-
-user.verified = true ;
-await user.save() ;
-
-const html =
-`
-<h1>Email Verified Successfully!</h1>
-        <p>Your email has been verified. You can now log in to your account.</p>
-        <a href="http://localhost:3000/login">Go to Login</a>
-        `
-
-        
-        return res.send(html)
-   } catch(err){
-    return res.status(400).json({
-        message: "Invalid or expired token" ,
-        success: false ,
-        err : err.message
-    })
-   }
-
-
-
-}
-
-
 
 
 
